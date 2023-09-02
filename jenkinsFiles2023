@@ -2,7 +2,7 @@ node{
   def  mavenHome = tool name: 'my-java-build-tool'
   stage('CloneCode'){
     sh "git clone https://github.com/LandmakTechnology/maven-web-application.git"
-    # bat "git clone https://github.com/LandmakTechnology/maven-web-application.git" --> window OS
+    //bat "git clone https://github.com/LandmakTechnology/maven-web-application.git" --> window OS
   }
   stage('mvnBuild'){
     sh "${mavenHome}/bin/mvn package"
