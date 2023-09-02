@@ -1,0 +1,31 @@
+node{
+  def  mavenHome = tool name: 'my-java-build-tool'
+  stage('CloneCode'){
+    sh "git clone https://github.com/LandmakTechnology/maven-web-application.git"
+    # bat "git clone https://github.com/LandmakTechnology/maven-web-application.git" --> window OS
+  }
+  stage('mvnBuild'){
+    sh "${mavenHome}/bin/mvn package"
+  }
+  stage('codeQuality'){
+  	sh "${mavenHome}/bin/mvn sonar:sonar"
+  }
+  stage('qualitfiedBackup'){
+  	sh "${mavenHome}/bin/mvn deploy"
+  }
+  stage('deployToTest'){
+  	deploy adapters: [tomcat9(credentialsId: 'Tomcat-pipeline', path: '', url: 'http://localhost:8090/')], contextPath: null, war: 'target/*.war'
+  }
+  stage('manuallyApprove'){
+  	sh "echo 'APPLICATION READY FOR REVIEW'"
+  	timeout(time:5, unit: 'HOURS'){
+  		input message: 'Application is ready for deployment, please review and approve'
+  	}
+  }
+  stage('deployToProd'){
+  	deploy adapters: [tomcat9(credentialsId: 'Tomcat-pipeline', path: '', url: 'http://localhost:8090/')], contextPath: null, war: 'target/*.war'
+  }
+  stage('emailNotification'){
+  	emailext body: 'There is a viscious error in the code, make sure to check and correct it.', recipientProviders: [developers(), contributor(), buildUser()], subject: '!!!!!!!!BUUUUUUUUUUUGGG!!!!!!', to: 'jeffyouashi@gmail.com'
+  }
+}
